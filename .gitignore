@@ -1,0 +1,17 @@
+# Build output
+build/
+Debug/
+Release/
+*.o
+*.elf
+*.hex
+*.bin
+*.map
+*.d
+
+# IDE cá nhân
+.vscode/
+.idea/
+*.user
+.settings/
+.metadata/
