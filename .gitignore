@@ -15,3 +15,4 @@ Release/
 *.user
 .settings/
 .metadata/
+STM32_ST-LINK_Utility/

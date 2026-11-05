@@ -5,7 +5,7 @@ GCC_dir:=G:/Embedded/Makefiile_Embedded/GNU_Make/GNU_Arm_ToolChain/10_2021_10
 CC=$(GCC_dir)/bin/arm-none-eabi-gcc
 OBJ_TOOL = $(GCC_dir)/arm-none-eabi/bin/objcopy.exe
 
-STFLASH = st-flash
+STFLASH = G:\Embedded\Makefiile_Embedded\Project\makefile-master\makefile-master\Makefile_Core\STM32_ST-LINK_Utility\ST-LINK_Utility
 
 GDB     = gdb-multiarch
 
@@ -16,6 +16,7 @@ SRC_DIRS = User/src \
 		  Lib/CMSIS/CM3/CoreSupport\
 		  Middlerware/FreeRTOS/FreeRTOS-Kernel\
 		  Middlerware/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM3\
+		  Driver/src
 		  
 
 SRC_FILES +=$(foreach SRC_DIRS,$(SRC_DIRS),$(wildcard $(SRC_DIRS)/*.c))
@@ -31,7 +32,8 @@ INC_DIRS = User/inc \
 			  Middlerware/FreeRTOS/FreeRTOS-Kernel\
 			  Middlerware/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM3\
 			  Middlerware/FreeRTOS\FreeRTOS-Kernel/include\
-			  Lib/stm32f10x_lib/STM32F10x_StdPeriph_Driver
+			  Lib/stm32f10x_lib/STM32F10x_StdPeriph_Driver\
+			  Driver/inc
 
 INC_FILES +=$(foreach INC_DIRS,$(INC_DIRS),$(wildcard $(INC_DIRS)/*.h))
 INC_DIR_OPT = $(foreach INC_DIRS,$(INC_DIRS),-I$(INC_DIRS))
@@ -57,7 +59,7 @@ LDFLAGS = -mcpu=$(CHIP) -mthumb -nostdlib -T $(LD_File) \
           -Wl,-Map=$(PATH_OUTPUT)/$(TARGET).map -Wl,--gc-sections
 LIBS    = -Wl,--start-group -lc_nano -lgcc -lnosys -Wl,--end-group
 
-build: $(PATH_OUTPUT)/$(TARGET).bin
+build: $(PATH_OUTPUT)/$(TARGET).hex
 
 $(PATH_OUTPUT)/%.o: %.c
 	@mkdir -p $(PATH_OUTPUT)
@@ -66,12 +68,13 @@ $(PATH_OUTPUT)/%.o: %.c
 $(PATH_OUTPUT)/$(TARGET).elf: $(PATH_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-$(PATH_OUTPUT)/$(TARGET).bin: $(PATH_OUTPUT)/$(TARGET).elf
-	$(OBJ_TOOL) -O binary "$^" "$@"
+$(PATH_OUTPUT)/$(TARGET).hex: $(PATH_OUTPUT)/$(TARGET).elf
+	$(OBJ_TOOL) -O ihex "$^" "$@"
 
-flash: Output/$(TARGET).bin
-	$(STFLASH) write Output/$(TARGET).bin 0x08000000
-
+run:
+	./STM32_ST-LINK_Utility/ST-LINK_Utility/ST-LINK_CLI.exe -ME
+	./STM32_ST-LINK_Utility/ST-LINK_Utility/ST-LINK_CLI.exe -p "$(PATH_OUTPUT)/$(TARGET).hex" 0x08000000
+	./STM32_ST-LINK_Utility/ST-LINK_Utility/ST-LINK_CLI.exe -rst
 erase:
 	$(STFLASH) erase
 
